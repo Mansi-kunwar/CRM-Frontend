@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
                     navigate("/sales");
                     break;
                 case "service":
-                    navigate("/service");
+                    navigate("/service-details");
                     break;
                 case "accounts":
                     navigate("/accounts");

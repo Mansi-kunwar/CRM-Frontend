@@ -3,7 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import SalesForm from "./pages/SalesForm";
 // import AdminDashboard from "./pages/AdminDashboard";
-// import ServicePage from "./pages/ServicePage";
+import ServicePage from "./pages/ServicePage";
 import AccountsPage from "./pages/AccountPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -30,10 +30,10 @@ function App() {
             }
           />
           <Route
-            path="/service"
+            path="/service-details"
             element={
               <ProtectedRoute allowedRoles={["service"]}>
-                {/* <ServicePage /> */}
+                <ServicePage />
               </ProtectedRoute>
             }
           />
