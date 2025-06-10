@@ -1,314 +1,10 @@
-
-// import {
-//     Box,
-//     Container,
-//     TextField,
-//     Typography,
-//     FormControl,
-//     InputLabel,
-//     Select,
-//     MenuItem,
-//     Button,
-//     Snackbar,
-//     IconButton,
-//     Grid
-// } from '@mui/material';
-// import { useState } from 'react';
-// import DeleteIcon from '@mui/icons-material/Delete';
-
-// const servicesList = [
-//     'VPS Server', 'Hosting Services', 'ITSM', 'Antivirus', 'VEEAM',
-//     'Data Backup/DR Services', 'E-Mailing/M365/Google Workspace', 'Tally Shared Cloud',
-//     'G Suite/M365', 'Managed Services', 'DLP', 'C Panel Servers',
-//     'Rental Services', 'SAAS Based Licences', 'AWS/Azure Public Cloud'
-// ];
-
-// export default function SalesForm() {
-//     const [isExisting, setIsExisting] = useState(false);
-//     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-
-//     const initialForm = {
-//         companyName: '',
-//         customerName: '',
-//         email: '',
-//         mobile: '',
-//         address: '',
-//         referenceSource: '',
-//         services: [],
-//         billingDate: '',
-//         yearlyCost: '',
-//         serviceCommitments: '',
-//         demoStatus: '',
-//         backup: '',
-//         filledBy: '',
-//     };
-
-//     const [formData, setFormData] = useState(initialForm);
-//     const [newService, setNewService] = useState({ serviceName: '', cost: '', billingInstruction: '', billingDate: '' });
-
-//     const handleChange = (e) => {
-//         setFormData({ ...formData, [e.target.name]: e.target.value });
-//     };
-
-//     const handleServiceFieldChange = (e) => {
-//         setNewService({ ...newService, [e.target.name]: e.target.value });
-//     };
-
-//     const addService = () => {
-//         if (!newService.serviceName || !newService.cost || !newService.billingInstruction || !newService.billingDate) {
-//             setSnackbar({ open: true, message: 'Please complete all service fields including billing date.', severity: 'error' });
-//             return;
-//         }
-
-//         if (isNaN(Number(newService.cost))) {
-//             setSnackbar({ open: true, message: 'Cost must be a number.', severity: 'error' });
-//             return;
-//         }
-
-//         const updatedServices = [...formData.services, { ...newService }];
-//         const updatedYearlyCost = updatedServices.reduce((sum, s) => sum + Number(s.cost), 0);
-
-//         setFormData({
-//             ...formData,
-//             services: updatedServices,
-//             yearlyCost: updatedYearlyCost.toFixed(2),
-//         });
-
-//         setNewService({ serviceName: '', cost: '', billingInstruction: '', billingDate: '' });
-//     };
-
-//     const removeService = (index) => {
-//         const updated = [...formData.services];
-//         updated.splice(index, 1);
-//         const updatedYearlyCost = updated.reduce((sum, s) => sum + Number(s.cost), 0);
-//         setFormData({ ...formData, services: updated, yearlyCost: updatedYearlyCost.toFixed(2) });
-//     };
-
-//     const fetchCompanyInfo = async () => {
-//         if (!formData.companyName) {
-//             setSnackbar({ open: true, message: 'Enter company name to check.', severity: 'error' });
-//             return;
-//         }
-
-//         try {
-//             const res = await fetch(`http://localhost:5000/api/sales/company/${formData.companyName}`);
-//             const data = await res.json();
-
-//             if (res.ok && data.company) {
-//                 const companyData = {
-//                     customerName: data.company.customerName || '',
-//                     email: data.company.email || '',
-//                     mobile: data.company.mobile || '',
-//                     address: data.company.address || '',
-//                     referenceSource: data.company.referenceSource || '',
-//                     billingDate: data.company.billingDate || '',
-//                     yearlyCost: data.company.yearlyCost || '',
-//                     serviceCommitments: data.company.serviceCommitments || '',
-//                     demoStatus: data.company.demoStatus || '',
-//                     backup: data.company.backup || '',
-//                     filledBy: data.company.filledBy || '',
-//                 };
-
-//                 setFormData((prev) => ({
-//                     ...prev,
-//                     ...companyData,
-//                     services: [],
-//                 }));
-
-//                 setIsExisting(true);
-//                 setSnackbar({ open: true, message: 'Company found. You can add more services.', severity: 'success' });
-//             } else {
-//                 setIsExisting(false);
-//                 setSnackbar({ open: true, message: 'Company not found.', severity: 'info' });
-//             }
-//         } catch (error) {
-//             setIsExisting(false);
-//             setSnackbar({ open: true, message: 'Error fetching company.', severity: 'error' });
-//         }
-//     };
-
-//     const handleSubmit = async () => {
-//         if (formData.services.length === 0) {
-//             setSnackbar({ open: true, message: "Please add at least one service.", severity: "error" });
-//             return;
-//         }
-
-//         try {
-//             const res = await fetch("http://localhost:5000/api/sales", {
-//                 method: "POST",
-//                 headers: { "Content-Type": "application/json" },
-//                 body: JSON.stringify(formData),
-//             });
-
-//             const data = await res.json();
-//             if (res.ok) {
-//                 setSnackbar({ open: true, message: "Sales form submitted successfully!", severity: "success" });
-//                 setFormData(initialForm);
-//                 setNewService({ serviceName: '', cost: '', billingInstruction: '', billingDate: '' });
-//                 setIsExisting(false);
-//             } else {
-//                 setSnackbar({ open: true, message: data.error || "Submission failed", severity: "error" });
-//             }
-//         } catch (error) {
-//             setSnackbar({ open: true, message: "Network error. Please try again.", severity: "error" });
-//         }
-//     };
-
-//     return (
-//         <Container maxWidth="md" sx={{ py: 4 }}>
-//             <Typography variant="h4" gutterBottom>
-//                 {isExisting ? 'Existing Customer' : 'New Customer (Sales Order Book)'}
-//             </Typography>
-
-//             <Box display="flex" gap={2} alignItems="center" mb={2}>
-//                 <TextField
-//                     label="Company Name"
-//                     name="companyName"
-//                     value={formData.companyName}
-//                     onChange={handleChange}
-//                     fullWidth
-//                     required
-//                 />
-//                 <Button variant="outlined" onClick={fetchCompanyInfo}>
-//                     Check Company
-//                 </Button>
-//             </Box>
-
-//             {!isExisting && (
-//                 <>
-//                     <TextField fullWidth margin="normal" label="Customer Name" name="customerName" value={formData.customerName} onChange={handleChange} required />
-//                     <TextField fullWidth margin="normal" label="Email Address" name="email" value={formData.email} onChange={handleChange} />
-//                     <TextField fullWidth margin="normal" label="Mobile No." name="mobile" value={formData.mobile} onChange={handleChange} required />
-//                     <TextField fullWidth margin="normal" label="Address" name="address" value={formData.address} onChange={handleChange} required />
-//                 </>
-//             )}
-
-//             <FormControl fullWidth margin="normal">
-//                 <InputLabel>Reference Source</InputLabel>
-//                 <Select name="referenceSource" value={formData.referenceSource} onChange={handleChange}>
-//                     {['Google PPC', 'BNI', 'Client Reference', 'Indiamart', 'Existing Customer', 'E2E'].map((source, idx) => (
-//                         <MenuItem key={idx} value={source}>{source}</MenuItem>
-//                     ))}
-//                 </Select>
-//             </FormControl>
-
-//             <TextField fullWidth margin="normal" label="Billing Date" name="billingDate" type="date" InputLabelProps={{ shrink: true }} value={formData.billingDate} onChange={handleChange} required />
-
-//             <Typography variant="h6" mt={3}>Add Services</Typography>
-
-//             <Grid container spacing={2} mt={1}>
-//                 <Grid item xs={3}>
-//                     <FormControl fullWidth>
-//                         <InputLabel>Service Name</InputLabel>
-//                         <Select name="serviceName" value={newService.serviceName} onChange={handleServiceFieldChange}>
-//                             {servicesList.map((service, idx) => (
-//                                 <MenuItem key={idx} value={service}>{service}</MenuItem>
-//                             ))}
-//                         </Select>
-//                     </FormControl>
-//                 </Grid>
-//                 <Grid item xs={3}>
-//                     <TextField label="Cost" name="cost" type="number" value={newService.cost} onChange={handleServiceFieldChange} fullWidth />
-//                 </Grid>
-//                 <Grid item xs={3}>
-//                     <FormControl fullWidth>
-//                         <InputLabel>Billing Instruction</InputLabel>
-//                         <Select name="billingInstruction" value={newService.billingInstruction} onChange={handleServiceFieldChange}>
-//                             {['Monthly', 'Quarterly', 'Half Yearly', 'Annually', 'Triennially'].map((option, idx) => (
-//                                 <MenuItem key={idx} value={option}>{option}</MenuItem>
-//                             ))}
-//                         </Select>
-//                     </FormControl>
-//                 </Grid>
-//                 <Grid item xs={3}>
-//                     <TextField
-//                         name="billingDate"
-//                         type="date"
-//                         value={newService.billingDate}
-//                         onChange={handleServiceFieldChange}
-//                         label="Service Billing Date"
-//                         InputLabelProps={{ shrink: true }}
-//                         fullWidth
-//                     />
-//                 </Grid>
-//             </Grid>
-
-//             <Box mt={2}>
-//                 <Button variant="outlined" onClick={addService}>Add Service</Button>
-//             </Box>
-
-//             {formData.services.map((service, index) => (
-//                 <Box key={index} display="flex" justifyContent="space-between" alignItems="center" mt={2} px={2} py={1} bgcolor="#f4f4f4" borderRadius={2}>
-//                     <Typography>
-//                         {service.serviceName} - ₹{service.cost} ({service.billingInstruction}, Billing: {service.billingDate})
-//                     </Typography>
-//                     <IconButton onClick={() => removeService(index)}><DeleteIcon /></IconButton>
-//                 </Box>
-//             ))}
-
-//             <TextField fullWidth margin="normal" label="Total Yearly Cost" name="yearlyCost" value={formData.yearlyCost} onChange={handleChange} required />
-//             <TextField fullWidth margin="normal" label="Service Commitments" name="serviceCommitments" value={formData.serviceCommitments} onChange={handleChange} required />
-
-//             <FormControl fullWidth margin="normal">
-//                 <InputLabel>Demo Status</InputLabel>
-//                 <Select name="demoStatus" value={formData.demoStatus} onChange={handleChange} required>
-//                     <MenuItem value="YES">YES</MenuItem>
-//                     <MenuItem value="NO">NO</MenuItem>
-//                 </Select>
-//             </FormControl>
-
-//             <FormControl fullWidth margin="normal">
-//                 <InputLabel>Backup Required?</InputLabel>
-//                 <Select name="backup" value={formData.backup} onChange={handleChange} required>
-//                     <MenuItem value="Full">Full</MenuItem>
-//                     <MenuItem value="Data Folders Only">Data Folders Only</MenuItem>
-//                     <MenuItem value="Not required, Client will take ownself">Not required, Client will take ownself</MenuItem>
-//                 </Select>
-//             </FormControl>
-
-//             <FormControl fullWidth margin="normal">
-//                 <InputLabel>Form Filled By</InputLabel>
-//                 <Select name="filledBy" value={formData.filledBy} onChange={handleChange} required>
-//                     {['Dheeraj Gupta', 'Jasmeet Bajaj', 'Seema', 'Riya', 'Jessica'].map((name, idx) => (
-//                         <MenuItem key={idx} value={name}>{name}</MenuItem>
-//                     ))}
-//                 </Select>
-//             </FormControl>
-
-//             <Box textAlign="center" mt={3}>
-//                 <Button variant="contained" size="large" onClick={handleSubmit}>
-//                     Submit Form
-//                 </Button>
-//             </Box>
-
-//             <Snackbar
-//                 open={snackbar.open}
-//                 onClose={() => setSnackbar({ ...snackbar, open: false })}
-//                 autoHideDuration={4000}
-//                 message={snackbar.message}
-//                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-//             />
-//         </Container>
-//     );
-// }
-
-
+import React, { useState, useEffect } from 'react';
 import {
-    Box,
-    Container,
-    TextField,
-    Typography,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Button,
-    Snackbar,
-    IconButton,
-    Grid,
+    Box, Container, TextField, Typography, FormControl, InputLabel,
+    Select, MenuItem, Button, Snackbar, IconButton, Grid, Autocomplete
 } from '@mui/material';
-import { useState, useEffect } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import axios from 'axios';
 
 const servicesList = [
     'VPS Server', 'Hosting Services', 'ITSM', 'Antivirus', 'VEEAM',
@@ -318,192 +14,209 @@ const servicesList = [
 ];
 
 export default function SalesForm() {
-    const [isExisting, setIsExisting] = useState(false);
-    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-
-    const initialForm = {
-        companyName: '',
+    const [companyOptions, setCompanyOptions] = useState([]);
+    const [formData, setFormData] = useState({
+        company: null,
         customerName: '',
         email: '',
         mobile: '',
         address: '',
-        referenceSource: '',
         serviceCommitments: '',
         demoStatus: '',
         backup: '',
         filledBy: '',
-    };
-
-    const [formData, setFormData] = useState(initialForm);
-
-    // Existing services already bought by company (read-only)
+    });
+    const [isExisting, setIsExisting] = useState(false);
     const [existingServices, setExistingServices] = useState([]);
-
-    // New services to add
-    const [newServices, setNewServices] = useState([]);
-
-    // New service being added in the form inputs
     const [newService, setNewService] = useState({
-        serviceName: '',
-        cost: '',
-        billingInstruction: '',
-        billingDate: '',
+        serviceName: '', cost: '', billingInstruction: '', billingDate: '',
+    });
+    const [newServices, setNewServices] = useState([]);
+    const [totalNewCost, setTotalNewCost] = useState('0.00');
+    const [snackbar, setSnackbar] = useState({
+        open: false, message: '', severity: 'success'
     });
 
-    // Calculate total cost = existing + new services
-    const calculateTotalCost = () => {
-        const existingCost = existingServices.reduce((sum, s) => sum + Number(s.cost), 0);
-        const newCost = newServices.reduce((sum, s) => sum + Number(s.cost), 0);
-        return (existingCost + newCost).toFixed(2);
-    };
-
-    const [totalYearlyCost, setTotalYearlyCost] = useState('0.00');
-
     useEffect(() => {
-        setTotalYearlyCost(calculateTotalCost());
-    }, [existingServices, newServices]);
+        const sum = newServices.reduce((acc, s) => acc + Number(s.cost), 0);
+        setTotalNewCost(sum.toFixed(2));
+    }, [newServices]);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Fetch matching companies
+    const fetchCompanies = async (input) => {
+        try {
+            const res = await axios.get('/api/company', { params: { q: input } });
+            setCompanyOptions(res.data);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    const handleServiceFieldChange = (e) => {
-        setNewService({ ...newService, [e.target.name]: e.target.value });
+    // When selecting a company via dropdown
+    const handleCompanySelect = (e, company) => {
+        if (company) {
+            setIsExisting(true);
+            setFormData(prev => ({
+                ...prev,
+                company: company._id,
+                customerName: company.customerName || '',
+                email: company.email || '',
+                mobile: company.mobile || '',
+                address: company.address || '',
+            }));
+            // Fetch its services
+            axios.get(`/api/company/${encodeURIComponent(company.companyName)}`)
+                .then(res => {
+                    setExistingServices(res.data.company.services || []);
+                })
+                .catch(() => setExistingServices([]));
+        } else {
+            // when user clears input
+            setIsExisting(false);
+            setExistingServices([]);
+            setFormData({
+                company: null,
+                customerName: '',
+                email: '',
+                mobile: '',
+                address: '',
+                serviceCommitments: '',
+                demoStatus: '',
+                backup: '',
+                filledBy: '',
+            });
+        }
+    };
+
+    const handleInputChange = (e) => {
+        setFormData(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    const handleServiceChange = (e) => {
+        setNewService(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
     };
 
     const addService = () => {
-        if (!newService.serviceName || !newService.cost || !newService.billingInstruction || !newService.billingDate) {
-            setSnackbar({ open: true, message: 'Please complete all service fields including billing date.', severity: 'error' });
-            return;
+        const { serviceName, cost, billingInstruction, billingDate } = newService;
+        if (!serviceName || !cost || !billingInstruction || !billingDate) {
+            return setSnackbar({
+                open: true,
+                message: 'Please complete all fields in new service.',
+                severity: 'error'
+            });
         }
-
-        if (isNaN(Number(newService.cost))) {
-            setSnackbar({ open: true, message: 'Cost must be a number.', severity: 'error' });
-            return;
+        if (isNaN(Number(cost))) {
+            return setSnackbar({
+                open: true,
+                message: 'Cost must be numeric.',
+                severity: 'error'
+            });
         }
-
-        // Check if service already exists in existingServices or newServices (avoid duplicates)
-        const serviceExists =
-            existingServices.some(s => s.serviceName === newService.serviceName) ||
-            newServices.some(s => s.serviceName === newService.serviceName);
-
-        if (serviceExists) {
-            setSnackbar({ open: true, message: 'Service already exists for this company.', severity: 'error' });
-            return;
+        const duplicate = existingServices.some(s => s.serviceName === serviceName) ||
+            newServices.some(s => s.serviceName === serviceName);
+        if (duplicate) {
+            return setSnackbar({
+                open: true,
+                message: 'Service already exists.',
+                severity: 'error'
+            });
         }
-
         setNewServices([...newServices, { ...newService }]);
         setNewService({ serviceName: '', cost: '', billingInstruction: '', billingDate: '' });
     };
 
-    const removeNewService = (index) => {
-        const updated = [...newServices];
-        updated.splice(index, 1);
-        setNewServices(updated);
-    };
-
-    const fetchCompanyInfo = async () => {
-        if (!formData.companyName) {
-            setSnackbar({ open: true, message: 'Enter company name to check.', severity: 'error' });
-            return;
-        }
-
-        try {
-            const res = await fetch(`http://localhost:5000/api/sales/company/${formData.companyName}`);
-            const data = await res.json();
-
-            if (res.ok && data.company) {
-                const companyData = {
-                    customerName: data.company.customerName || '',
-                    email: data.company.email || '',
-                    mobile: data.company.mobile || '',
-                    address: data.company.address || '',
-                    referenceSource: data.company.referenceSource || '',
-                    serviceCommitments: data.company.serviceCommitments || '',
-                    demoStatus: data.company.demoStatus || '',
-                    backup: data.company.backup || '',
-                    filledBy: data.company.filledBy || '',
-                };
-
-                setFormData(companyData);
-                setExistingServices(data.company.services || []); // load existing services
-
-                setNewServices([]); // reset new services input
-
-                setIsExisting(true);
-                setSnackbar({ open: true, message: 'Company found. You can add more services.', severity: 'success' });
-            } else {
-                setIsExisting(false);
-                setExistingServices([]);
-                setNewServices([]);
-                setFormData(initialForm);
-                setFormData((prev) => ({ ...prev, companyName: formData.companyName }));
-                setSnackbar({ open: true, message: 'Company not found.', severity: 'info' });
-            }
-        } catch (error) {
-            setIsExisting(false);
-            setSnackbar({ open: true, message: 'Error fetching company.', severity: 'error' });
-        }
+    const removeService = (i) => {
+        setNewServices(prev => prev.filter((_, idx) => idx !== i));
     };
 
     const handleSubmit = async () => {
-        if (newServices.length === 0) {
-            setSnackbar({ open: true, message: 'Please add at least one new service.', severity: 'error' });
-            return;
+        if (!isExisting && !formData.company) {
+            return setSnackbar({
+                open: true,
+                message: 'Please select or enter a new company.',
+                severity: 'error'
+            });
         }
-
-        // Prepare data to send
-        // For existing company: send company info + new services only
-        // For new company: send full form + all services (but here, all services are in newServices array)
+        if (newServices.length === 0) {
+            return setSnackbar({
+                open: true,
+                message: 'Add at least one new service.',
+                severity: 'error'
+            });
+        }
         const payload = {
-            ...formData,
+            companyName: formData.companyName,
+            companyId: formData.company,
+            customerName: formData.customerName,
+            email: formData.email,
+            mobile: formData.mobile,
+            address: formData.address,
+            serviceCommitments: formData.serviceCommitments,
+            demoStatus: formData.demoStatus,
+            backup: formData.backup,
+            filledBy: formData.filledBy,
             services: newServices,
         };
-
         try {
-            const res = await fetch('http://localhost:5000/api/sales', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                setSnackbar({ open: true, message: 'Sales form submitted successfully!', severity: 'success' });
-                setFormData(initialForm);
+            const res = await axios.post('/api/sales', payload);
+            if (res.status === 201) {
+                setSnackbar({
+                    open: true,
+                    message: 'Sales form submitted successfully!',
+                    severity: 'success'
+                });
+                // reset form
+                setFormData({
+                    company: null, companyName: '',
+                    customerName: '', email: '', mobile: '', address: '',
+                    serviceCommitments: '', demoStatus: '', backup: '', filledBy: ''
+                });
+                setIsExisting(false);
                 setExistingServices([]);
                 setNewServices([]);
-                setIsExisting(false);
             } else {
-                setSnackbar({ open: true, message: data.error || 'Submission failed', severity: 'error' });
+                throw new Error(res.data.error || 'Unknown error');
             }
         } catch (error) {
-            setSnackbar({ open: true, message: 'Network error. Please try again.', severity: 'error' });
+            setSnackbar({
+                open: true,
+                message: error.message || 'Submission failed',
+                severity: 'error'
+            });
         }
     };
 
     return (
         <Container maxWidth="md" sx={{ py: 4 }}>
             <Typography variant="h4" gutterBottom>
-                {isExisting ? 'Existing Customer' : 'New Customer (Sales Order Book)'}
+                {isExisting ? 'Existing Customer' : 'New Customer'}
             </Typography>
 
-            <Box display="flex" gap={2} alignItems="center" mb={2}>
-                <TextField
-                    label="Company Name"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    fullWidth
-                    required
-                    disabled={isExisting} // disable companyName editing if existing
-                />
-                <Button variant="outlined" onClick={fetchCompanyInfo} disabled={isExisting}>
-                    Check Company
-                </Button>
-            </Box>
+            {/* Autocomplete Company Selector */}
+            <Autocomplete
+                options={companyOptions}
+                getOptionLabel={(opt) => opt.companyName}
+                onInputChange={(e, value) => fetchCompanies(value)}
+                onChange={handleCompanySelect}
+                freeSolo
+                renderInput={(params) =>
+                    <TextField
+                        {...params}
+                        label="Company Name"
+                        variant="outlined"
+                        required
+                    />
+                }
+                value={companyOptions.find(c => c._id === formData.company) || null}
+            />
 
+            {/* Show basic info for new company */}
             {!isExisting && (
                 <>
                     <TextField
@@ -512,24 +225,24 @@ export default function SalesForm() {
                         label="Customer Name"
                         name="customerName"
                         value={formData.customerName}
-                        onChange={handleChange}
+                        onChange={handleInputChange}
                         required
                     />
                     <TextField
                         fullWidth
                         margin="normal"
-                        label="Email Address"
+                        label="Email"
                         name="email"
                         value={formData.email}
-                        onChange={handleChange}
+                        onChange={handleInputChange}
                     />
                     <TextField
                         fullWidth
                         margin="normal"
-                        label="Mobile No."
+                        label="Mobile"
                         name="mobile"
                         value={formData.mobile}
-                        onChange={handleChange}
+                        onChange={handleInputChange}
                         required
                     />
                     <TextField
@@ -538,46 +251,44 @@ export default function SalesForm() {
                         label="Address"
                         name="address"
                         value={formData.address}
-                        onChange={handleChange}
+                        onChange={handleInputChange}
                         required
                     />
                 </>
             )}
 
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Reference Source</InputLabel>
-                <Select name="referenceSource" value={formData.referenceSource} onChange={handleChange}>
-                    {['Google PPC', 'BNI', 'Client Reference', 'Indiamart', 'Existing Customer', 'E2E'].map(
-                        (source, idx) => (
-                            <MenuItem key={idx} value={source}>
-                                {source}
-                            </MenuItem>
-                        )
-                    )}
-                </Select>
-            </FormControl>
-
+            {/* Required Fields */}
             <TextField
                 fullWidth
                 margin="normal"
-                label="Service Commitments"
+                label="Service Commitments *"
                 name="serviceCommitments"
                 value={formData.serviceCommitments}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 required
             />
 
             <FormControl fullWidth margin="normal">
-                <InputLabel>Demo Status</InputLabel>
-                <Select name="demoStatus" value={formData.demoStatus} onChange={handleChange} required>
+                <InputLabel>Demo Status *</InputLabel>
+                <Select
+                    name="demoStatus"
+                    value={formData.demoStatus}
+                    onChange={handleInputChange}
+                    required
+                >
                     <MenuItem value="YES">YES</MenuItem>
                     <MenuItem value="NO">NO</MenuItem>
                 </Select>
             </FormControl>
 
             <FormControl fullWidth margin="normal">
-                <InputLabel>Backup</InputLabel>
-                <Select name="backup" value={formData.backup} onChange={handleChange} required>
+                <InputLabel>Backup *</InputLabel>
+                <Select
+                    name="backup"
+                    value={formData.backup}
+                    onChange={handleInputChange}
+                    required
+                >
                     <MenuItem value="YES">YES</MenuItem>
                     <MenuItem value="NO">NO</MenuItem>
                 </Select>
@@ -586,55 +297,42 @@ export default function SalesForm() {
             <TextField
                 fullWidth
                 margin="normal"
-                label="Form Filled By"
+                label="Form Filled By *"
                 name="filledBy"
                 value={formData.filledBy}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 required
             />
 
-            {/* Existing Services List (Read-only) */}
+            {/* Read-only list of previously subscribed services */}
             {isExisting && existingServices.length > 0 && (
-                <Box mt={4} mb={2}>
-                    <Typography variant="h6">Existing Services for {formData.companyName}</Typography>
-                    <Box sx={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #ccc', p: 2, borderRadius: 1 }}>
-                        {existingServices.map((service, index) => (
-                            <Box
-                                key={index}
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                mb={1}
-                            >
-                                <Typography>{service.serviceName}</Typography>
-                                <Typography>
-                                    Cost: ₹{service.cost} | Billing: {service.billingInstruction} | Date: {service.billingDate}
-                                </Typography>
-                            </Box>
-                        ))}
-                    </Box>
+                <Box my={2} p={2} border="1px solid #ccc" borderRadius={1}>
+                    <Typography variant="h6">Previously Subscribed Services</Typography>
+                    {existingServices.map((svc, idx) => (
+                        <Box key={idx} display="flex" justifyContent="space-between" mb={1}>
+                            <Typography>{svc.serviceName}</Typography>
+                            <Typography>
+                                ₹{svc.cost} | {svc.billingInstruction} | {new Date(svc.billingDate).toLocaleDateString()}
+                            </Typography>
+                        </Box>
+                    ))}
                 </Box>
             )}
 
-            {/* New Services to Add */}
+            {/* Section to add new services */}
             <Box mt={4}>
-                <Typography variant="h6" gutterBottom>
-                    Add New Services
-                </Typography>
-
-                <Grid container spacing={2}>
+                <Typography variant="h6">Add New Services</Typography>
+                <Grid container spacing={2} mt={1}>
                     <Grid item xs={12} sm={6}>
                         <FormControl fullWidth>
-                            <InputLabel>Service Name</InputLabel>
+                            <InputLabel>Service Name *</InputLabel>
                             <Select
                                 name="serviceName"
                                 value={newService.serviceName}
-                                onChange={handleServiceFieldChange}
+                                onChange={handleServiceChange}
                             >
-                                {servicesList.map((service, idx) => (
-                                    <MenuItem key={idx} value={service}>
-                                        {service}
-                                    </MenuItem>
+                                {servicesList.map((s, idx) => (
+                                    <MenuItem key={idx} value={s}>{s}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
@@ -643,28 +341,29 @@ export default function SalesForm() {
                     <Grid item xs={12} sm={3}>
                         <TextField
                             fullWidth
-                            label="Yearly Cost (₹)"
+                            label="Yearly Cost (₹)*"
                             name="cost"
                             value={newService.cost}
-                            onChange={handleServiceFieldChange}
+                            onChange={handleServiceChange}
                             type="number"
                             inputProps={{ min: 0 }}
+                            required
                         />
                     </Grid>
 
                     <Grid item xs={12} sm={3}>
                         <FormControl fullWidth>
-                            <InputLabel>Billing Instruction</InputLabel>
+                            <InputLabel>Billing Frequency *</InputLabel>
                             <Select
                                 name="billingInstruction"
                                 value={newService.billingInstruction}
-                                onChange={handleServiceFieldChange}
+                                onChange={handleServiceChange}
+                                required
                             >
-                                {['Monthly', 'Quarterly', 'Half Yearly', 'Yearly'].map((option, idx) => (
-                                    <MenuItem key={idx} value={option}>
-                                        {option}
-                                    </MenuItem>
-                                ))}
+                                <MenuItem value="Monthly">Monthly</MenuItem>
+                                <MenuItem value="Quarterly">Quarterly</MenuItem>
+                                <MenuItem value="Half-Yearly">Half-Yearly</MenuItem>
+                                <MenuItem value="Yearly">Yearly</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
@@ -672,43 +371,44 @@ export default function SalesForm() {
                     <Grid item xs={12} sm={6}>
                         <TextField
                             fullWidth
-                            label="Billing Date"
+                            label="Billing Start Date *"
                             name="billingDate"
-                            value={newService.billingDate}
-                            onChange={handleServiceFieldChange}
                             type="date"
+                            value={newService.billingDate}
+                            onChange={handleServiceChange}
                             InputLabelProps={{ shrink: true }}
+                            required
                         />
                     </Grid>
 
-                    <Grid item xs={12} sm={6} display="flex" alignItems="center">
-                        <Button variant="contained" color="primary" onClick={addService} fullWidth>
+                    <Grid item xs={12} sm={6}>
+                        <Button fullWidth variant="contained" color="primary" onClick={addService}>
                             Add Service
                         </Button>
                     </Grid>
                 </Grid>
             </Box>
 
-            {/* New services list with remove option */}
+            {/* List of new services */}
             {newServices.length > 0 && (
-                <Box mt={3}>
-                    <Typography variant="subtitle1">New Services to Add</Typography>
-                    {newServices.map((service, index) => (
+                <Box my={3}>
+                    <Typography variant="subtitle1">New Services Added</Typography>
+                    {newServices.map((svc, idx) => (
                         <Box
-                            key={index}
+                            key={idx}
                             display="flex"
                             justifyContent="space-between"
                             alignItems="center"
-                            mb={1}
                             p={1}
                             border="1px solid #ccc"
                             borderRadius={1}
+                            mb={1}
                         >
-                            <Typography>{service.serviceName}</Typography>
+                            <Typography>{svc.serviceName}</Typography>
                             <Typography>
-                                Cost: ₹{service.cost} | Billing: {service.billingInstruction} | Date: {service.billingDate}
+                                ₹{svc.cost} | {svc.billingInstruction} | {svc.billingDate}
                             </Typography>
-                            <IconButton onClick={() => removeNewService(index)} size="small" color="error">
+                            <IconButton color="error" onClick={() => removeService(idx)}>
                                 <DeleteIcon />
                             </IconButton>
                         </Box>
@@ -716,23 +416,27 @@ export default function SalesForm() {
                 </Box>
             )}
 
-            {/* Total Yearly Cost */}
-            <Box mt={3}>
+            {/* Total cost of only new services */}
+            <Box my={2}>
                 <Typography variant="h6">
-                    Total Yearly Cost (Existing + New): ₹{totalYearlyCost}
+                    Total Yearly Cost (New Services): ₹{totalNewCost}
                 </Typography>
             </Box>
 
-            <Box mt={4}>
-                <Button variant="contained" color="success" fullWidth onClick={handleSubmit}>
-                    Submit Sales Form
-                </Button>
-            </Box>
+            <Button
+                fullWidth
+                variant="contained"
+                color="success"
+                onClick={handleSubmit}
+                sx={{ mt: 2 }}
+            >
+                Submit Sales Form
+            </Button>
 
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
                 message={snackbar.message}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             />
